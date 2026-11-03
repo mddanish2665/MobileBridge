@@ -136,6 +136,7 @@ public sealed class EmulatorService
         // so the phone trusts this PC without a prompt.
         await Adb.StartServerAsync();
         Directory.CreateDirectory(AppPaths.Logs);
+        ResetSavedWindowPosition();
 
         var args = new List<string>
         {
@@ -175,6 +176,45 @@ public sealed class EmulatorService
             await Task.Delay(2000, ct);
         }
         Log.Info($"Android started in {sw.Elapsed.TotalSeconds:0} s.");
+        progress.Report(new("Android started. Preparing the phone window…"));
+        await PreparePhoneAsync(bringToFront: true);
+    }
+
+    /// <summary>
+    /// Wakes the phone and keeps its screen on (a sleeping phone shows as a black window),
+    /// then makes sure the phone window is visible on screen.
+    /// </summary>
+    public static async Task PreparePhoneAsync(bool bringToFront)
+    {
+        string[][] commands =
+        {
+            new[] { "svc", "power", "stayon", "true" },
+            new[] { "settings", "put", "system", "screen_off_timeout", "2147483647" },
+            new[] { "input", "keyevent", "KEYCODE_WAKEUP" },
+            new[] { "wm", "dismiss-keyguard" },
+        };
+        foreach (var c in commands)
+        {
+            try { await Adb.RunAsync(TimeSpan.FromSeconds(15), default, new[] { "-s", Serial, "shell" }.Concat(c).ToArray()); }
+            catch (Exception ex) { Log.Info($"Could not run '{string.Join(' ', c)}': {ex.Message}"); }
+        }
+        // The window can appear a moment after Android reports it is ready.
+        for (int i = 0; i < 10 && !WindowHelper.EnsurePhoneWindowVisible(bringToFront); i++)
+            await Task.Delay(1000);
+    }
+
+    /// <summary>Removes a remembered window position that may be off-screen (e.g. after a monitor change).</summary>
+    static void ResetSavedWindowPosition()
+    {
+        var userIni = Path.Combine(AvdDir, "emulator-user.ini");
+        if (!File.Exists(userIni)) return;
+        try
+        {
+            var lines = File.ReadAllLines(userIni)
+                .Where(l => !l.StartsWith("window.x", StringComparison.Ordinal) && !l.StartsWith("window.y", StringComparison.Ordinal));
+            File.WriteAllLines(userIni, lines);
+        }
+        catch { /* not critical */ }
     }
 
     public async Task StopAsync()

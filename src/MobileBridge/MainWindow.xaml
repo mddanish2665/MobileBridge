@@ -65,6 +65,7 @@
                                     <TextBlock x:Name="EmuStatusText" FontWeight="SemiBold" Text="Phone: stopped" Margin="0,0,0,8"/>
                                     <WrapPanel>
                                         <Button Style="{StaticResource AccentButton}" Content="Start Phone" Click="StartEmu_Click"/>
+                                        <Button Content="Show phone window" Click="ShowPhone_Click"/>
                                         <Button Content="Stop Phone" Click="StopEmu_Click"/>
                                         <Button Content="Factory reset…" Click="WipeEmu_Click"/>
                                     </WrapPanel>

@@ -174,7 +174,12 @@ public partial class MainWindow : Window, IBusyHost
             if (!_busy && online != _emuOnline)
             {
                 _emuOnline = online;
-                if (online) await VirtualApps.RefreshAsync(true); else VirtualApps.Clear();
+                if (online)
+                {
+                    await EmulatorService.PreparePhoneAsync(bringToFront: false);
+                    await VirtualApps.RefreshAsync(true);
+                }
+                else VirtualApps.Clear();
             }
             if (!_busy)
                 EmuStatusText.Text = _emuOnline ? "Phone: running ✅" : emu != null ? "Phone: starting…" : "Phone: stopped";
@@ -353,6 +358,7 @@ public partial class MainWindow : Window, IBusyHost
                 p.Report(new("The phone is already running — waiting for Android…"));
                 var sw = Stopwatch.StartNew();
                 while (!await SafeBootCompleted() && sw.Elapsed < TimeSpan.FromMinutes(5)) await Task.Delay(2000, ct);
+                await EmulatorService.PreparePhoneAsync(bringToFront: true);
                 await MarkOnlineAsync();
                 return;
             }
@@ -395,6 +401,17 @@ public partial class MainWindow : Window, IBusyHost
         _emuOnline = true;
         EmuStatusText.Text = "Phone: running ✅";
         await VirtualApps.RefreshAsync(true);
+    }
+
+    async void ShowPhone_Click(object sender, RoutedEventArgs e)
+    {
+        if (!_emuOnline)
+        {
+            MessageBox.Show(this, "The phone is not running. Click \"Start Phone\" first.", "MobileBridge",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        await RunBusy("Showing the phone window", async (_, _) => await EmulatorService.PreparePhoneAsync(bringToFront: true));
     }
 
     async void StopEmu_Click(object sender, RoutedEventArgs e) => await RunBusy("Stopping the virtual phone", async (p, _) =>
