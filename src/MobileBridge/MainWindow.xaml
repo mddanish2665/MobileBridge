@@ -1,0 +1,239 @@
+<Window x:Class="MobileBridge.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:MobileBridge"
+        Title="MobileBridge — Android apps on your PC" Height="780" Width="1120" MinHeight="620" MinWidth="940"
+        WindowStartupLocation="CenterScreen" Background="#F1F5F9" FontSize="13">
+    <DockPanel>
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" Background="#0F172A" Padding="20,12">
+            <StackPanel>
+                <TextBlock Text="MobileBridge" Foreground="White" FontSize="22" FontWeight="Bold"/>
+                <TextBlock Text="Run a virtual Android phone on your PC  •  Mirror and control your real phone"
+                           Foreground="#CBD5E1"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Status bar -->
+        <Border DockPanel.Dock="Bottom" Background="White" BorderBrush="#E2E8F0" BorderThickness="0,1,0,0" Padding="12,8">
+            <DockPanel>
+                <Button x:Name="CancelButton" DockPanel.Dock="Right" Content="Cancel" Visibility="Collapsed"
+                        Click="Cancel_Click" Margin="8,0,0,0" MinHeight="26" Padding="10,2"/>
+                <ProgressBar x:Name="Progress" DockPanel.Dock="Right" Width="280" Height="16" Visibility="Collapsed"/>
+                <TextBlock x:Name="StatusText" VerticalAlignment="Center" Text="Ready." TextTrimming="CharacterEllipsis"/>
+            </DockPanel>
+        </Border>
+
+        <TabControl Margin="12" Padding="0">
+            <!-- ===================== VIRTUAL PHONE ===================== -->
+            <TabItem Header="   Virtual Phone   " FontSize="14">
+                <Grid Margin="12" TextElement.FontSize="13">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="430"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <GroupBox Header="Step 1 — Set up (one time)">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource Hint}"
+                                               Text="Downloads Google's official Android Emulator and an Android system image with Google Play (about 2–3 GB) and builds a virtual phone."/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <TextBlock Text="Android version:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <ComboBox x:Name="AndroidVersionBox" Width="250" DisplayMemberPath="Display"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="SetupStatusText" TextWrapping="Wrap" Margin="0,0,0,10" LineHeight="20"/>
+                                    <Button x:Name="SetupButton" Style="{StaticResource AccentButton}" Content="Download &amp; Set Up"
+                                            Click="Setup_Click" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Hardware acceleration">
+                                <StackPanel>
+                                    <TextBlock x:Name="AccelText" TextWrapping="Wrap" Margin="0,0,0,8"
+                                               Text="Checked automatically after setup."/>
+                                    <WrapPanel>
+                                        <Button Content="Check again" Click="AccelCheck_Click"/>
+                                        <Button Content="Enable Windows Hypervisor Platform…" Click="EnableHypervisor_Click"/>
+                                    </WrapPanel>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Step 2 — Run the phone">
+                                <StackPanel>
+                                    <TextBlock x:Name="EmuStatusText" FontWeight="SemiBold" Text="Phone: stopped" Margin="0,0,0,8"/>
+                                    <WrapPanel>
+                                        <Button Style="{StaticResource AccentButton}" Content="Start Phone" Click="StartEmu_Click"/>
+                                        <Button Content="Stop Phone" Click="StopEmu_Click"/>
+                                        <Button Content="Factory reset…" Click="WipeEmu_Click"/>
+                                    </WrapPanel>
+                                    <CheckBox x:Name="ColdBootBox" Content="Cold boot (full restart instead of quick resume)" Margin="0,2,0,8"/>
+                                    <TextBlock Style="{StaticResource Hint}"
+                                               Text="The phone opens in its own window. Tip: open the Play Store inside the phone and sign in with your Google account to install apps like on a real phone. On a brand-new phone, wait about 5 minutes after the first start before signing in (Google Play Services updates itself first)."/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <GroupBox Grid.Column="2" Header="Apps on the virtual phone" Margin="0">
+                        <local:AppsPanel x:Name="VirtualApps"/>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- ===================== REAL PHONE ===================== -->
+            <TabItem Header="   Real Phone (Mirror)   " FontSize="14">
+                <Grid Margin="12" TextElement.FontSize="13">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="430"/>
+                        <ColumnDefinition Width="14"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <GroupBox Header="Step 1 — Download tools (one time)">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource Hint}"
+                                               Text="Apps run on your real phone, so banking apps, games with anti-cheat and everything else works normally. Your PC only shows and controls the screen."/>
+                                    <TextBlock x:Name="MirrorSetupText" Margin="0,0,0,10" LineHeight="20"/>
+                                    <Button x:Name="MirrorSetupButton" Style="{StaticResource AccentButton}" Content="Download tools"
+                                            Click="MirrorSetup_Click" HorizontalAlignment="Left"/>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Step 2 — Connect your phone">
+                                <StackPanel>
+                                    <TextBlock Style="{StaticResource Hint}" Foreground="#1E293B">
+                                        <Run Text="1. On the phone open Settings › About phone and tap"/>
+                                        <Run Text="Build number" FontWeight="SemiBold"/>
+                                        <Run Text="7 times."/>
+                                        <LineBreak/>
+                                        <Run Text="2. Open Settings › Developer options and turn on"/>
+                                        <Run Text="USB debugging" FontWeight="SemiBold"/><Run Text="."/>
+                                        <LineBreak/>
+                                        <Run Text="3. Connect the USB cable and tap"/>
+                                        <Run Text="Allow" FontWeight="SemiBold"/>
+                                        <Run Text="on the phone."/>
+                                    </TextBlock>
+                                    <DockPanel Margin="0,0,0,4">
+                                        <Button DockPanel.Dock="Right" Content="Refresh" Click="RefreshDevices_Click" Margin="8,0,0,0"/>
+                                        <TextBlock Text="Detected phones:" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    </DockPanel>
+                                    <ListBox x:Name="DevicesList" Height="96" DisplayMemberPath="Display"/>
+                                    <TextBlock x:Name="NoDevicesText" Style="{StaticResource Hint}" Margin="0,4,0,0"
+                                               Text="No phone detected yet."/>
+
+                                    <Expander Header="Connect without a cable (Wi-Fi, Android 11+)" Margin="0,8,0,0">
+                                        <StackPanel Margin="0,8,0,0">
+                                            <TextBlock Style="{StaticResource Hint}"
+                                                       Text="Phone and PC must be on the same Wi-Fi. On the phone: Developer options › Wireless debugging › 'Pair device with pairing code'."/>
+                                            <Grid Margin="0,0,0,6">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="110"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/><RowDefinition/><RowDefinition/>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="Pairing IP:port" VerticalAlignment="Center"/>
+                                                <TextBox x:Name="PairAddressBox" Grid.Column="1" Margin="0,2" Padding="3"/>
+                                                <TextBlock Grid.Row="1" Text="Pairing code" VerticalAlignment="Center"/>
+                                                <TextBox x:Name="PairCodeBox" Grid.Row="1" Grid.Column="1" Margin="0,2" Padding="3"/>
+                                                <Button Grid.Row="2" Grid.Column="1" Content="Pair" Click="Pair_Click"
+                                                        HorizontalAlignment="Left" Margin="0,4,0,4"/>
+                                            </Grid>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="110"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition/><RowDefinition/>
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Text="Phone IP:port" VerticalAlignment="Center"/>
+                                                <TextBox x:Name="ConnectAddressBox" Grid.Column="1" Margin="0,2" Padding="3"/>
+                                                <Button Grid.Row="1" Grid.Column="1" Content="Connect" Click="Connect_Click"
+                                                        HorizontalAlignment="Left" Margin="0,4,0,0"/>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Expander>
+                                </StackPanel>
+                            </GroupBox>
+
+                            <GroupBox Header="Step 3 — Show the phone on your PC">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <TextBlock Text="Quality:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                        <ComboBox x:Name="MaxSizeBox" Width="190" SelectedIndex="0">
+                                            <ComboBoxItem Content="Original resolution" Tag="0"/>
+                                            <ComboBoxItem Content="1920 px (high)" Tag="1920"/>
+                                            <ComboBoxItem Content="1280 px (balanced)" Tag="1280"/>
+                                            <ComboBoxItem Content="1024 px (fast / slow PC)" Tag="1024"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                    <CheckBox x:Name="AudioBox" Content="Play phone sound on the PC (Android 11+)" IsChecked="True" Margin="0,2"/>
+                                    <CheckBox x:Name="ScreenOffBox" Content="Turn the phone's own screen off while mirroring" Margin="0,2"/>
+                                    <CheckBox x:Name="StayAwakeBox" Content="Keep the phone awake (USB only)" IsChecked="True" Margin="0,2,0,8"/>
+                                    <Button Style="{StaticResource AccentButton}" Content="Start Mirroring" Click="StartMirror_Click"
+                                            HorizontalAlignment="Left"/>
+                                    <TextBlock Style="{StaticResource Hint}"
+                                               Text="Control it with mouse and keyboard. Right-click = Back. Ctrl+H = Home. Drag files onto the window to copy them to the phone."/>
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <GroupBox Grid.Column="2" Header="Apps on the selected phone" Margin="0">
+                        <local:AppsPanel x:Name="RealApps"/>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
+            <!-- ===================== SETTINGS ===================== -->
+            <TabItem Header="   Settings   " FontSize="14">
+                <StackPanel Margin="16" MaxWidth="760" HorizontalAlignment="Left" TextElement.FontSize="13">
+                    <GroupBox Header="Storage folder">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Hint}"
+                                       Text="Everything MobileBridge downloads (emulator, Android images, tools) and the virtual phone's storage are kept here. Needs about 10–15 GB."/>
+                            <TextBox x:Name="DataFolderBox" IsReadOnly="True" Padding="4" Margin="0,0,0,8"/>
+                            <WrapPanel>
+                                <Button Content="Change folder…" Click="ChangeFolder_Click"/>
+                                <Button Content="Open folder" Click="OpenFolder_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="Clean up">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Hint}" Text="Free disk space. You can always download again with 'Download &amp; Set Up'."/>
+                            <WrapPanel>
+                                <Button Content="Delete the virtual phone…" Click="DeletePhone_Click"/>
+                                <Button Content="Remove everything downloaded…" Click="RemoveAll_Click"/>
+                            </WrapPanel>
+                        </StackPanel>
+                    </GroupBox>
+                    <GroupBox Header="About">
+                        <TextBlock Style="{StaticResource Hint}" TextWrapping="Wrap">
+                            <Run Text="MobileBridge 1.0. The virtual phone uses Google's official Android Emulator and system images, downloaded from Google under the Android SDK License. Real Phone mode uses scrcpy (Apache-2.0) by Genymobile."/>
+                            <LineBreak/><LineBreak/>
+                            <Run Text="Note: some apps (many banking apps and games with anti-cheat) refuse to run on any emulator. Use Real Phone mode for those."/>
+                        </TextBlock>
+                    </GroupBox>
+                </StackPanel>
+            </TabItem>
+
+            <!-- ===================== LOG ===================== -->
+            <TabItem Header="   Log   " FontSize="14">
+                <DockPanel Margin="8">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                        <Button Content="Open log file" Click="OpenLog_Click"/>
+                        <Button Content="Open emulator log" Click="OpenEmuLog_Click"/>
+                    </StackPanel>
+                    <TextBox x:Name="LogBox" IsReadOnly="True" FontFamily="Consolas" FontSize="12"
+                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

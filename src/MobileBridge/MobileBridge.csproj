@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>MobileBridge</AssemblyName>
+    <RootNamespace>MobileBridge</RootNamespace>
+    <Version>1.0.0</Version>
+    <Product>MobileBridge</Product>
+    <Description>Run Android apps on Windows (virtual phone) and mirror/control a real phone.</Description>
+  </PropertyGroup>
+
+</Project>
